@@ -1,0 +1,54 @@
+# ============================================================
+#  inverted-pendulum-fuzzy-control  —  .gitignore
+# ============================================================
+
+# ---- Generated run folders (large — GIFs, MAT files) ------
+# A single run reaches ~200 MB of animations. Never commit these:
+# git history is permanent, and GIFs do not delta-compress.
+Pendulum_Control_Run_*/
+
+# ---- Web bundle (committed deliberately) -------------------
+# docs/ is built by fp_export_web: stills copied, a curated set of
+# animations shrunk to web size, asset paths rewritten. ~10 MB.
+# GitHub Pages serves this folder.
+!docs/
+!docs/**
+
+# ---- Optimisation results ----------------------------------
+# opt_results.mat can be large; optimised_config.m is generated.
+opt_results.mat
+optimised_config.m
+
+# ---- Report data bundle ------------------------------------
+# report_data.js IS committed so GitHub Pages can serve it.
+# Regenerate locally with fp_build_report, then commit + push.
+# report_data.js   <-- do NOT uncomment
+
+# ---- MATLAB autosave and temp files -----------------------
+*.asv
+*.m~
+octave-workspace
+
+# ---- MATLAB compiled / MEX files --------------------------
+*.mex*
+*.mexw64
+*.mexa64
+*.mexmaci64
+*.slxc
+*.autosave
+
+# ---- Large output files (optional — uncomment to exclude) --
+# *.mat
+# *.gif
+# *.mp4
+
+# ---- OS junk ----------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Editor / IDE -----------------------------------------
+.vscode/
+.idea/
+*.swp
+*~

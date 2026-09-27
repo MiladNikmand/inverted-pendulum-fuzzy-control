@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Fuzzy Inverted Pendulum — Results Report</title>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:#f6f8fa;color:#24292f;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.7;padding:32px 16px 80px}
+.page{max-width:940px;margin:0 auto}
+.wide{max-width:1340px;margin:0 auto 28px}
+.card{background:#fff;border:1px solid #d0d7de;border-radius:8px;
+  padding:34px 38px;margin-bottom:26px;box-shadow:0 1px 3px rgba(31,35,40,.08)}
+h1{font-size:2rem;margin:0 0 6px;color:#0969da;
+  border-bottom:2px solid #d0d7de;padding-bottom:12px}
+h2{font-size:1.28rem;border-bottom:1px solid #d0d7de;padding-bottom:6px;margin-top:28px}
+h3{font-size:1.04rem;margin-top:20px;color:#1f2328}
+h4{font-size:.93rem;margin:12px 0 6px}
+.meta{font-size:.88rem;color:#57606a;margin-bottom:18px}
+.hint{font-size:.8rem;color:#8b949e;margin:4px 0 14px}
+.math-box{background:#f8f9fa;border-left:4px solid #0969da;
+  padding:14px 18px;margin:16px 0;overflow-x:auto;border-radius:0 6px 6px 0}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:.85em;background:#f0f2f4;padding:1px 5px;border-radius:4px}
+a{color:#0969da}
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}
+.chip{font-size:.79rem;background:#f6f8fa;border:1px solid #d0d7de;
+  border-radius:999px;padding:3px 11px;white-space:nowrap}
+.chip b{color:#57606a;font-weight:500}
+.chip.ok{background:#ddf4e4;border-color:#acddb8;color:#1a7f37}
+.chip.warn{background:#fff8c5;border-color:#e3b341;color:#7a4a0a}
+.chip.fail{background:#ffebe9;border-color:#ff9492;color:#cf222e}
+.chip.info{background:#ddf4ff;border-color:#80ccff;color:#0550ae}
+/* tabs */
+.tabbar{display:flex;flex-wrap:wrap;gap:4px;
+  border-bottom:1px solid #d0d7de;margin:20px 0 0;padding:0}
+.tab{appearance:none;background:transparent;border:1px solid transparent;
+  border-bottom:none;border-radius:6px 6px 0 0;padding:7px 15px;
+  font:inherit;font-size:.88rem;color:#57606a;cursor:pointer;margin-bottom:-1px}
+.tab:hover{background:#f3f4f6;color:#24292f}
+.tab[aria-selected="true"]{background:#fff;border-color:#d0d7de;
+  border-bottom:1px solid #fff;color:#0969da;font-weight:600}
+.run-panel{padding-top:18px}
+.run-panel[hidden]{display:none}
+/* summary table */
+.tbl-wrap{overflow-x:auto;margin:12px 0}
+table.summary{border-collapse:collapse;width:100%;font-size:.83rem;
+  font-variant-numeric:tabular-nums}
+table.summary th,table.summary td{border:1px solid #d0d7de;padding:7px 10px;
+  text-align:right;white-space:nowrap}
+table.summary th{background:#f6f8fa;cursor:pointer;user-select:none;
+  font-weight:600;position:sticky;top:0}
+table.summary th:hover{background:#eaeef2}
+table.summary th::after{content:"";opacity:.35;padding-left:4px}
+table.summary th[data-dir="asc"]::after{content:"▲";opacity:1}
+table.summary th[data-dir="desc"]::after{content:"▼";opacity:1}
+table.summary th:first-child,table.summary td:first-child{text-align:left}
+table.summary tbody tr:nth-child(even){background:#fafbfc}
+table.summary tbody tr.best{background:#ddf4e4}
+table.summary tbody tr.best td:first-child::before{content:"★ ";color:#1a7f37}
+table.summary tbody tr.failed-row{background:#ffebe9}
+/* controller grid */
+.ctrl-grid{margin-top:18px}
+.grid-head{display:grid;
+  grid-template-columns:170px repeat(4,1fr);gap:10px;
+  padding:0 0 8px;border-bottom:2px solid #d0d7de;
+  font-size:.74rem;font-weight:600;color:#57606a;
+  text-transform:uppercase;letter-spacing:.05em}
+.ctrl-row{display:grid;
+  grid-template-columns:170px repeat(4,1fr);gap:10px;
+  align-items:start;padding:14px 0;border-bottom:1px solid #d0d7de}
+.ctrl-label .cname{font-size:.9rem;font-weight:600;color:#1f2328}
+.ctrl-label .ck{font-size:.76rem;color:#57606a;margin-top:2px}
+.ctrl-label .cbadge{display:inline-block;margin-top:5px;font-size:.72rem;
+  border-radius:4px;padding:1px 7px}
+.cbadge.ok{background:#ddf4e4;color:#1a7f37}
+.cbadge.fail{background:#ffebe9;color:#cf222e}
+.cbadge.dim{background:#f6f8fa;color:#57606a}
+/* media cells */
+.cell-frame{border:1px solid #d0d7de;border-radius:6px;overflow:hidden;
+  background:#f6f8fa;cursor:pointer;position:relative;min-height:60px}
+.cell-frame img{width:100%;height:auto;display:block}
+.cell-frame.missing{display:flex;align-items:center;justify-content:center;
+  font-size:.76rem;color:#8b949e;padding:10px;min-height:60px}
+.cell-frame.is-static:hover{border-color:#0969da}
+.play-badge{position:absolute;bottom:6px;right:6px;
+  background:rgba(9,105,218,.82);color:#fff;
+  border-radius:3px;padding:2px 7px;font-size:.72rem;pointer-events:none}
+.cell-frame.playing .play-badge{background:rgba(207,34,46,.82)}
+/* rule heatmap */
+.rb-wrap{overflow-x:auto;margin:14px 0}
+.rb-grid{display:inline-grid;border:1px solid #d0d7de;border-radius:4px;
+  overflow:hidden;font-size:.7rem;line-height:1}
+.rb-cell{width:32px;height:32px;display:flex;align-items:center;
+  justify-content:center;font-weight:600;color:#fff;cursor:default}
+.rb-label-row,.rb-label-col{font-size:.65rem;font-weight:700;
+  color:#57606a;display:flex;align-items:center;justify-content:center}
+/* lyapunov trace */
+svg.ltrace{width:100%;height:140px;display:block;overflow:visible}
+/* toolbar */
+.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:20px 0 8px}
+.toolbar h3{margin:0;flex:1}
+.btn{appearance:none;font:inherit;font-size:.81rem;background:#f6f8fa;
+  border:1px solid #d0d7de;border-radius:6px;padding:4px 11px;
+  color:#24292f;cursor:pointer}
+.btn:hover{background:#eaeef2}
+/* lightbox */
+#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.84);
+  display:flex;align-items:center;justify-content:center;z-index:999;cursor:zoom-out}
+#lightbox[hidden]{display:none}
+#lightbox img{max-width:92vw;max-height:92vh;border-radius:6px;
+  box-shadow:0 4px 24px rgba(0,0,0,.5)}
+/* empty */
+.empty{background:#f6f8fa;border:1px dashed #d0d7de;border-radius:8px;
+  padding:28px;text-align:center;color:#57606a}
+
+  /* --- position regulation cell flags (added in RP2) --- */
+  td.good { color:#0a7d33; font-weight:600; }
+  td.bad  { color:#c0392b; font-weight:600; }
+
+  /* --- disturbance section --- */
+  .dist-tabs { display:flex; gap:6px; flex-wrap:wrap; margin:10px 0 14px; }
+  .dist-tab  { padding:6px 14px; border:1px solid #d0d7de; border-radius:6px;
+               background:#f6f8fa; cursor:pointer; font-size:.86rem; }
+  .dist-tab.active { background:#0969da; color:#fff; border-color:#0969da; }
+  .dist-note { font-size:.84rem; color:#57606a; margin:6px 0 12px; }
+  .recov-ok   { color:#0a7d33; font-weight:600; }
+  .recov-slow { color:#9a6700; font-weight:600; }
+  .recov-bad  { color:#c0392b; font-weight:600; }
+
+  /* --- optimisation section --- */
+  .opt-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+              gap:14px; margin:12px 0; }
+  .opt-card { border:1px solid #d0d7de; border-radius:8px; padding:12px 14px;
+              background:#fff; }
+  .opt-card h4 { margin:0 0 8px; font-size:.95rem; font-family:ui-monospace,monospace; }
+  .parbar { height:8px; background:#eaeef2; border-radius:4px; position:relative;
+            margin:2px 0 8px; }
+  .parbar i { position:absolute; top:0; bottom:0; border-radius:4px; }
+  .parbar .ws  { background:#adb5bd; }
+  .parbar .opt { background:#0969da; }
+  .improve-pos { color:#0a7d33; font-weight:600; }
+  .improve-neg { color:#57606a; }
+
+  /* --- findings + glossary (RP2b) --- */
+  .findings { margin:14px 0 6px; }
+  .find-list { list-style:none; padding:0; margin:8px 0 0; }
+  .find-list li { padding:9px 12px 9px 34px; margin-bottom:6px; border-radius:6px;
+                  font-size:.9rem; line-height:1.5; position:relative; }
+  .find-list li:before { position:absolute; left:11px; top:9px; font-weight:700; }
+  .find-ok   { background:#e8f5ec; color:#14532d; }
+  .find-ok:before   { content:'✓'; color:#0a7d33; }
+  .find-warn { background:#fdf3e3; color:#6b4a0b; }
+  .find-warn:before { content:'!'; color:#9a6700; }
+  .find-info { background:#eef4fb; color:#1c3d5a; }
+  .find-info:before { content:'i'; color:#0969da; font-style:italic; }
+  .glossary { margin:6px 0 16px; border:1px solid #d0d7de; border-radius:8px;
+              padding:8px 12px; background:#fbfcfd; }
+  .glossary summary { cursor:pointer; font-size:.88rem; font-weight:600;
+                      color:#0969da; }
+  .glossary table { margin-top:10px; font-size:.85rem; }
+  .glossary td { vertical-align:top; padding:6px 8px; }
+</style>
+</head>
+<body>
+
+<!-- =====================================================================
+     STATIC THEORY SECTION
+===================================================================== -->
+<div class="page">
+<div class="card">
+  <h1>Fuzzy Inverted Pendulum on a Cart</h1>
+  <p class="meta">
+    Cart-pendulum &nbsp;·&nbsp; Lagrangian mechanics &nbsp;·&nbsp; 4-state nonlinear ODE &nbsp;·&nbsp;
+    Sugeno / Mamdani / Type-2 fuzzy PID &nbsp;·&nbsp;
+    Fuzzy SMC &nbsp;·&nbsp; Adaptive fuzzy &nbsp;·&nbsp;
+    Energy / Backstepping / Sinusoidal / Fuzzy swing-up
+  </p>
+
+  <h2>1 &nbsp; Physical configuration</h2>
+  <p>
+    A cart of mass <em>mc</em> slides freely along a horizontal track
+    (or around a horizontal ring — the dynamics are identical; the ring
+    prevents the cart hitting hard stops). A pendulum rod of length
+    <em>l</em> and bob mass <em>m</em> hangs from the cart pivot and
+    swings in the vertical plane.
+  </p>
+  <div class="math-box">
+    \[
+      \text{State: }\quad x = [x_c,\;\dot x_c,\;\theta,\;\dot\theta]^\top
+      \qquad
+      \begin{cases}
+        \theta=0   & \text{upright (unstable equilibrium)}\\
+        \theta=\pi & \text{hanging (stable equilibrium)}
+      \end{cases}
+    \]
+    <p style="margin:8px 0 0;font-size:.86rem;color:#57606a">
+      \(x_c\) = cart position (m, unbounded) &ensp;|&ensp;
+      \(F\) = horizontal force on cart (N) &ensp;|&ensp;
+      Error convention: \(e = +\theta\)
+    </p>
+  </div>
+  <p>
+    <strong>Error convention:</strong> \(e = +\theta\) (not \(-\theta\)).
+    The mass-matrix inverse gives \(M^{-1}_{21} < 0\), so positive \(F\)
+    produces negative \(\ddot\theta\). A positive angle error therefore
+    requires positive force: \(F = k_p\theta \Rightarrow \ddot\theta < 0\)
+    (corrective).
+  </p>
+
+  <h2>2 &nbsp; Equations of motion (Lagrangian)</h2>
+  <p>
+    Applying the Euler-Lagrange equations to the two generalised coordinates
+    (\(x_c\), θ):
+  </p>
+  <div class="math-box">
+    \[
+      (m_c+m)\,\ddot x_c \;+\; ml\,\ddot\theta\cos\theta
+      \;=\; F \;-\; b\,\dot x_c \;-\; ml\,\dot\theta^2\sin\theta
+    \]
+    \[
+      ml^2\,\ddot\theta \;+\; ml\,\ddot x_c\cos\theta
+      \;=\; mgl\sin\theta \;-\; b_p\,\dot\theta
+    \]
+    <p style="margin:8px 0 0;font-size:.86rem;color:#57606a">
+      In matrix form: \(M(\theta)\,[\ddot x_c;\,\ddot\theta] = \text{rhs}\)
+      &ensp;where&ensp;
+      \(M(\theta) = \begin{bmatrix}m_c{+}m & ml\cos\theta\\ ml\cos\theta & ml^2\end{bmatrix}\)
+    </p>
+  </div>
+  <p>
+    The gravity term \(mgl\sin\theta\) is <strong>positive</strong> —
+    it drives θ away from 0, confirming the upright is the unstable
+    equilibrium that the controller must maintain.
+  </p>
+
+  <h2>3 &nbsp; Controllability (rank-4)</h2>
+  <p>
+    At the upright equilibrium (θ = 0, θ̇ = 0) the mass matrix reduces to:
+  </p>
+  <div class="math-box">
+    \[
+      M_{eq} = \begin{bmatrix}m_c+m & ml \\ ml & ml^2\end{bmatrix}
+      \qquad
+      B = M_{eq}^{-1}\begin{bmatrix}1\\0\end{bmatrix}
+        = \begin{bmatrix}M_{eq,11}^{-1}\\M_{eq,21}^{-1}\end{bmatrix}
+    \]
+  </div>
+  <p>
+    The off-diagonal coupling \(ml\) is <strong>non-zero</strong> at
+    equilibrium. Both entries of \(M_{eq}^{-1}B\) are non-zero, so
+    force \(F\) directly actuates both \(\ddot x_c\) and \(\ddot\theta\)
+    in the linearised model. The controllability matrix has
+    <strong>rank 4</strong> — LQR is a fully valid baseline.
+  </p>
+  <p class="hint">
+    For the medium preset (\(m_c=2.5\), \(m=0.2\), \(l=0.5\)):
+    \(M_{eq,21}^{-1} = -0.8\) (rad/s²)/N.
+    A 1 N force produces 0.8 rad/s² of corrective angular acceleration —
+    strong enough to overcome gravity at small angles while remaining
+    numerically stable at dt = 0.005 s.
+  </p>
+
+  <h2>4 &nbsp; Fuzzy system components</h2>
+  <table class="summary" style="margin-top:10px">
+    <thead>
+      <tr><th>Component</th><th>Variable</th><th>Options</th><th>Effect on control</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Fuzzification</td><td>MF shape</td>
+          <td>Triangular, Gaussian, Trapezoidal</td>
+          <td>Sparsity of rule activation; smoothness of control surface</td></tr>
+      <tr><td></td><td>N sets</td><td>5, 7, 9</td>
+          <td>25, 49, or 81 rules; resolution vs complexity</td></tr>
+      <tr><td></td><td>Partition</td><td>Uniform, Concentrated</td>
+          <td>Fine resolution near upright vs equal coverage everywhere</td></tr>
+      <tr><td></td><td>Type-2 FOU</td><td>0 – 0.5</td>
+          <td>Uncertainty absorption; larger = more robust to parameter error</td></tr>
+      <tr><td>Inference</td><td>AND operator</td><td>min, product</td>
+          <td>min: sparse; product: all rules always active</td></tr>
+      <tr><td></td><td>Type</td><td>Sugeno, Mamdani</td>
+          <td>Consequent type; Sugeno faster, Mamdani richer surface shape</td></tr>
+      <tr><td>Defuzzification</td><td>Method</td>
+          <td>Weighted avg, Centroid, MOM</td>
+          <td>Output resolution; MOM is most aggressive (winner-takes-all)</td></tr>
+    </tbody>
+  </table>
+
+  
+  <h2>5 &nbsp; Position regulation and the cascade governor</h2>
+  <p>
+    Balancing the pendulum and parking the cart at a chosen point are two
+    objectives driven by a single force. The system is
+    <strong>underactuated</strong>: two outputs to place, one input to place
+    them with. They cannot be commanded independently, and every force that
+    corrects \(\theta\) also moves \(x_c\).
+  </p>
+
+  <h3>Why a direct position term does not work</h3>
+  <p>
+    The obvious fix is to add a correction to the controller output:
+  </p>
+  <div class="math-box">
+    \[ F = F_\theta(\theta,\dot\theta) \;+\; k_{p,x}(x_c-x_{ref}) + k_{d,x}\dot x_c \]
+  </div>
+  <p>
+    This fails, and it fails for a structural reason rather than a tuning one.
+    Near equilibrium the angle loop is very stiff — a tenth of a degree of
+    tilt already commands several newtons — so the position term is either
+    negligible against it or, once large enough to move the cart, large enough
+    to topple the pendulum. There is no separation between the two regimes.
+    Raising \(k_{p,x}\) trades one failure for the other.
+  </p>
+
+  <h3>The cascade</h3>
+  <p>
+    The working architecture never adds the two objectives together. It puts
+    them on different timescales and lets the faster one serve the slower one:
+  </p>
+  <div class="math-box">
+    \[
+      \underbrace{\theta_{ref} = \mathrm{clamp}\!\left(
+        -k_{p,gov}(x_c-x_{ref}) - k_{d,gov}\dot x_c,\;
+        \pm\theta_{max}\right)}_{\text{outer loop — slow, position}}
+    \]
+    \[
+      \underbrace{F = F_\theta(\theta-\theta_{ref},\;\dot\theta)
+      }_{\text{inner loop — fast, angle}}
+    \]
+  </div>
+  <p>
+    The inner loop is unchanged: it still regulates an angle to a reference.
+    The outer loop simply moves that reference. Tilting the pendulum a degree
+    or two puts a horizontal component of gravity on the bob, the cart
+    accelerates in that direction, and the inner loop holds the tilt while it
+    happens. The coupling that makes the problem hard is the same coupling the
+    solution exploits.
+  </p>
+  <p>
+    At steady state, \(x_c = x_{ref}\) gives \(\theta_{ref}=0\) and the
+    controller reduces exactly to pure balancing. Nothing is left running.
+  </p>
+
+  <h3>Stability gate</h3>
+  <p class="hint">
+    The governor stays switched off until \(|\theta|<5^\circ\) has held
+    continuously for 1.5 s. Before that the pendulum is still recovering from
+    capture and has no margin to spend on moving the cart. If \(\theta\) later
+    leaves that band — after a disturbance, say — the governor disengages and
+    re-arms only once balance is restored. Position regulation is treated as
+    the lower-priority objective throughout, which is what keeps it from ever
+    costing the pendulum.
+  </p>
+
+  <h3>Where the gains come from</h3>
+  <p>
+    The governor gains are not hand-tuned. The plant is augmented with the
+    integral of position error,
+    \(x_a=[x_c,\;\dot x_c,\;\theta,\;\dot\theta,\;\textstyle\int (x_c-x_{ref})]\),
+    and an LQR solved on that 5-state system. The resulting \(K_5\) already
+    encodes the optimal trade-off between the two objectives, and the cascade
+    gains are read straight off it:
+  </p>
+  <div class="math-box">
+    \[ k_{p,gov}=\left|\frac{K_5[1]}{K_5[3]}\right|\cdot\frac{180}{\pi},
+       \qquad
+       k_{d,gov}=\left|\frac{K_5[2]}{K_5[3]}\right|\cdot\frac{180}{\pi} \]
+  </div>
+  <p class="hint">
+    This is why the analytical design already works before any tuning, and why
+    the optimisation tab reports improvement <em>relative to it</em> rather
+    than relative to an arbitrary starting guess.
+  </p>
+
+  <h2>6 &nbsp; Controllers</h2>
+  <table class="summary" style="margin-top:10px">
+    <thead>
+      <tr><th>Controller</th><th>Law</th><th>Type</th><th>Key property</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>FuzzyPID_Sugeno</code></td>
+          <td>\(F = k_p(e,\dot e)\cdot e + k_d\cdot\dot e + k_i\cdot\int e\)</td>
+          <td>Fuzzy — primary</td>
+          <td>Weighted average defuzz; fast; industry standard</td></tr>
+      <tr><td><code>FuzzyPID_Mamdani</code></td>
+          <td>Same rule base, centroid defuzz</td>
+          <td>Fuzzy — primary</td>
+          <td>Different control surface shape from same rules</td></tr>
+      <tr><td><code>FuzzyPID_Type2</code></td>
+          <td>Interval MFs + KM type reduction</td>
+          <td>Fuzzy — primary</td>
+          <td>Absorbs parameter uncertainty inside FOU band</td></tr>
+      <tr><td><code>FuzzySMC</code></td>
+          <td>\(F = F_\text{eq} - K_\text{fuzzy}(s,\dot s)\cdot\text{sat}(s/\phi_b)\)</td>
+          <td>Fuzzy — primary</td>
+          <td>Eliminates SMC chattering via adaptive switching gain</td></tr>
+      <tr><td><code>AdaptiveFuzzy</code></td>
+          <td>FuzzyPID + online \(\partial J/\partial\text{rule}\) updates</td>
+          <td>Fuzzy — primary</td>
+          <td>Rule base improves during the run</td></tr>
+      <tr><td><code>LQR</code></td>
+          <td>\(F = -K_\text{lqr}\,x\)</td>
+          <td>Non-fuzzy — baseline</td>
+          <td>Degrades at nonzero φ̇; proves linear control insufficient</td></tr>
+      <tr><td><code>ClassicalPID</code></td>
+          <td>\(F = k_p e + k_d\dot e + k_i\int e\) (fixed gains)</td>
+          <td>Non-fuzzy — baseline</td>
+          <td>Cannot adapt; shows cost of fixed-gain compromise</td></tr>
+    </tbody>
+  </table>
+
+  <h2>7 &nbsp; Swing-up strategies</h2>
+  <table class="summary" style="margin-top:10px">
+    <thead>
+      <tr><th>Strategy</th><th>Core idea</th><th>Lyapunov function</th><th>Convergence</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Energy-based</td>
+          <td>\(F=k\cdot(E{-}E_t)\cdot\cos\theta\cdot\dot\theta\) — proportional, chatter-free</td>
+          <td>\(V_{su} = \tfrac{1}{2}(E-E_t)^2\)</td>
+          <td>Guaranteed (\(\dot V\le0\))</td></tr>
+      <tr><td>Backstepping</td>
+          <td>Two-level cascade: φ̇_desired → F</td>
+          <td>\(V_{bs} = \tfrac{1}{2}E_e^2 + \tfrac{k_1}{2k_2}e_{\dot\phi}^2\)</td>
+          <td>Guaranteed (V̇_bs &lt; 0)</td></tr>
+      <tr><td>Sinusoidal</td>
+          <td>Phase-aware bang-bang at ω_n</td>
+          <td>None</td>
+          <td>Empirical only</td></tr>
+      <tr><td>Fuzzy</td>
+          <td>Rule-based + energy hybrid</td>
+          <td>Partial (energy component)</td>
+          <td>Partial</td></tr>
+    </tbody>
+  </table>
+
+  <h2>8 &nbsp; Disturbances</h2>
+  <table class="summary" style="margin-top:10px">
+    <thead>
+      <tr><th>Type</th><th>Model</th><th>Channel</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Impulse kick</td><td>Gaussian force pulse on cart</td><td>φ</td></tr>
+      <tr><td>Wind gust</td><td>von Kármán drag: F_wind = ½ρCdA·v_w²</td><td>θ (torque)</td></tr>
+      <tr><td>Track friction</td><td>Coulomb + viscous for set duration</td><td>φ (opposing)</td></tr>
+      <tr><td>Parametric mass</td><td>Bob mass steps up at t_event (changes M11, E_target)</td><td>Parametric</td></tr>
+      <tr><td>Track inclination</td><td>Gravity component in φ: F∝(mc+m)g·sin(α)·sin(φ)</td><td>φ (periodic)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>9 &nbsp; How to update this report</h2>
+  <ol>
+    <li>Run: <code>pendulum_launch</code> or <code>run_all</code></li>
+    <li>Generate data: <code>fp_build_report</code></li>
+    <li>Commit <code>report_data.js</code> and push — GitHub Pages updates automatically.</li>
+  </ol>
+  <p class="hint">
+    <code>report.html</code> and <code>report_data.js</code> must be in the same folder.
+    Works on <code>file://</code> locally and on GitHub Pages without a server.
+  </p>
+</div>
+</div><!-- .page -->
+
+<!-- =====================================================================
+     DYNAMIC RESULTS SECTION
+===================================================================== -->
+<div class="wide">
+<div class="card" id="results-root">
+  <h2 style="margin-top:0">Results</h2>
+  <p class="hint" id="gen-stamp"></p>
+  <div class="tabbar" id="tabbar" role="tablist"></div>
+  <div id="panels"></div>
+</div>
+</div>
+
+<!-- lightbox -->
+<div id="lightbox" hidden role="dialog">
+  <img id="lightbox-img" alt="">
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---- utils ---- */
+function el(tag,cls,txt){
+  var e=document.createElement(tag);
+  if(cls)e.className=cls; if(txt!=null)e.textContent=txt; return e;
+}
+function num(v,dp){
+  if(v==null||!isFinite(v))return '—';
+  return (+v).toFixed(dp!=null?dp:3);
+}
+// MATLAB NaN arrives as JSON null, and isFinite(null) is true in JS.
+// Every numeric test on report data must go through fin().
+function fin(v){ return v!=null && isFinite(v); }
+function pct(v){ return fin(v)?num(v,1)+'%':'—'; }
+
+/* ---- lightbox ---- */
+var lb=document.getElementById('lightbox');
+var lbImg=document.getElementById('lightbox-img');
+function openLb(src,alt){lbImg.src=src;lbImg.alt=alt||'';lb.hidden=false;}
+lb.addEventListener('click',function(){lb.hidden=true;lbImg.src='';});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&!lb.hidden){lb.hidden=true;lbImg.src='';}
+});
+
+/* ---- GIF toggle ---- */
+function toggleGif(frame){
+  var img=frame.querySelector('img'); if(!img)return;
+  if(frame.classList.contains('playing')){
+    img.src=frame.dataset.poster;
+    frame.classList.remove('playing');
+    frame.querySelector('.play-badge').textContent='▶';
+  }else{
+    img.src=frame.dataset.gif;
+    frame.classList.add('playing');
+    frame.querySelector('.play-badge').textContent='■';
+  }
+}
+function setAllGifs(panel,play){
+  panel.querySelectorAll('.cell-frame[data-gif]').forEach(function(f){
+    if(play!==f.classList.contains('playing'))toggleGif(f);
+  });
+}
+
+/* ---- media cell ---- */
+function mkCell(src,alt){
+  var cell=el('div','');
+  if(!src){
+    var f=el('div','cell-frame missing','—'); cell.appendChild(f); return cell;
+  }
+  var isGif=src.toLowerCase().endsWith('.gif');
+  var frame=el('div','cell-frame');
+  var img=el('img'); img.loading='lazy'; img.alt=alt||'';
+  if(isGif){
+    img.src=src;
+    frame.dataset.gif=src; frame.dataset.poster=src;
+    var badge=el('div','play-badge','▶');
+    frame.appendChild(img); frame.appendChild(badge);
+    frame.addEventListener('click',function(){toggleGif(frame);});
+  }else{
+    frame.classList.add('is-static');
+    img.src=src; frame.appendChild(img);
+    frame.addEventListener('click',function(){openLb(src,alt);});
+  }
+  img.addEventListener('error',function(){
+    frame.className='cell-frame missing';
+    frame.textContent='missing';
+  });
+  cell.appendChild(frame); return cell;
+}
+
+/* ---- rule base heatmap ---- */
+function mkRuleheatmap(rule_table, title){
+  if(!rule_table||!rule_table.length)return null;
+  var n=rule_table.length;
+  var vals=rule_table.flat();
+  var lo=Math.min.apply(null,vals), hi=Math.max.apply(null,vals);
+  var wrap=el('div','rb-wrap');
+  var cap=el('div',''); cap.style.cssText='font-size:.78rem;font-weight:600;color:#57606a;margin-bottom:4px';
+  cap.textContent=title; wrap.appendChild(cap);
+
+  var grid=el('div','rb-grid');
+  grid.style.gridTemplateColumns='repeat('+(n+1)+',32px)';
+  grid.style.display='inline-grid';
+
+  // corner
+  var corner=el('div','rb-label-col',''); grid.appendChild(corner);
+  // col headers
+  var ling=['NL','NM','NS','ZE','PS','PM','PL','N2','P2'];
+  for(var j=0;j<n;j++){
+    var lh=el('div','rb-label-col',ling[j]||(''+j));
+    lh.style.cssText='background:#f6f8fa;color:#57606a;font-size:.62rem;font-weight:700';
+    grid.appendChild(lh);
+  }
+  for(var i=0;i<n;i++){
+    var lr=el('div','rb-label-row',ling[i]||(''+i));
+    lr.style.cssText='background:#f6f8fa;color:#57606a;font-size:.62rem;font-weight:700';
+    grid.appendChild(lr);
+    for(var j2=0;j2<n;j2++){
+      var v=rule_table[i][j2];
+      var t=(hi>lo)?(v-lo)/(hi-lo):0.5;
+      var r=Math.round(9+t*200), g_=Math.round(9+t*120), b=Math.round(200-t*140);
+      var cell=el('div','rb-cell', (v>0&&v<1)?num(v,2):(''+(v|0)));
+      cell.style.background='rgb('+r+','+g_+','+b+')';
+      cell.title='e='+ling[i]+' edot='+ling[j2]+' → '+v;
+      grid.appendChild(cell);
+    }
+  }
+  wrap.appendChild(grid); return wrap;
+}
+
+/* ---- Lyapunov mini-trace SVG ---- */
+function mkLyapSvg(V_vals, Vdot_vals, pct_ok, label){
+  if(!V_vals||!V_vals.length)return null;
+  var W=400,H=120,PL=30,PR=10,PT=12,PB=20;
+  var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  svg.setAttribute('class','ltrace');
+  var n=V_vals.length;
+  var vMax=Math.max.apply(null,V_vals.map(Math.abs).concat([0.001]));
+  var dMax=Math.max.apply(null,Vdot_vals.map(Math.abs).concat([0.001]));
+  function sx(k){return PL+(k/Math.max(n-1,1))*(W-PL-PR);}
+  function sy(v,mx){return PT+(H-PT-PB)*(1-Math.max(-1,Math.min(1,v/mx))/2)-(H-PT-PB)/2+PT+(H-PT-PB)*0.5-PT;}
+  // simplified: map v in [-max,max] to [H-PB, PT]
+  function syV(v,mx){return H-PB - (H-PT-PB)*Math.max(0,Math.min(1,(v)/(mx+1e-9)));}
+  function syD(v,mx){return (H-PT-PB)/2+PT - (H-PT-PB)/2*Math.max(-1,Math.min(1,v/(mx+1e-9)));}
+
+  function axLine(x1,y1,x2,y2,stroke,sw){
+    var l=document.createElementNS('http://www.w3.org/2000/svg','line');
+    [['x1',x1],['y1',y1],['x2',x2],['y2',y2],['stroke',stroke||'#d0d7de'],['stroke-width',sw||1]
+    ].forEach(function(a){l.setAttribute(a[0],a[1]);});
+    svg.appendChild(l);
+  }
+  function polyline(pts,stroke,sw){
+    if(!pts.length)return;
+    var p=document.createElementNS('http://www.w3.org/2000/svg','polyline');
+    p.setAttribute('points',pts.join(' '));
+    p.setAttribute('fill','none');p.setAttribute('stroke',stroke);
+    p.setAttribute('stroke-width',sw||1.5);p.setAttribute('stroke-linejoin','round');
+    svg.appendChild(p);
+  }
+  function svgText(x,y,t,fill,fs){
+    var e=document.createElementNS('http://www.w3.org/2000/svg','text');
+    e.setAttribute('x',x);e.setAttribute('y',y);e.textContent=t;
+    e.setAttribute('fill',fill||'#8b949e');e.setAttribute('font-size',fs||9);
+    e.setAttribute('font-family','ui-monospace,monospace');
+    svg.appendChild(e);
+  }
+
+  var bg=document.createElementNS('http://www.w3.org/2000/svg','rect');
+  bg.setAttribute('x',PL);bg.setAttribute('y',PT);
+  bg.setAttribute('width',W-PL-PR);bg.setAttribute('height',H-PT-PB);
+  bg.setAttribute('fill','#f8f9fa');svg.appendChild(bg);
+
+  axLine(PL,PT,PL,H-PB,'#d0d7de');
+  axLine(PL,H-PB,W-PR,H-PB,'#d0d7de');
+  // zero line for Vdot
+  var zy=(H-PT-PB)/2+PT;
+  axLine(PL,zy,W-PR,zy,'#d0d7de',0.7);
+
+  var V_pts=[], D_pts=[];
+  for(var k=0;k<n;k++){
+    V_pts.push(sx(k)+','+syV(V_vals[k],vMax));
+    D_pts.push(sx(k)+','+syD(Vdot_vals[k],dMax));
+  }
+  polyline(V_pts,'#0969da',1.8);
+  polyline(D_pts,'#cf222e',1.3);
+
+  svgText(PL+4,PT+12,'V(x)','#0969da',8);
+  svgText(PL+4,PT+22,'dV/dt','#cf222e',8);
+  if(pct_ok!=null) svgText(PL+4,PT+34,pct_ok+'% dV≤0','#1a7f37',8);
+  svgText(PL+W/2,H,'steps →','#8b949e',8);
+
+  var wrap=el('div','');
+  var cap=el('div','');
+  cap.style.cssText='font-size:.74rem;font-weight:600;color:#57606a;margin-bottom:3px';
+  cap.textContent=label||'Lyapunov'; wrap.appendChild(cap);
+  wrap.appendChild(svg); return wrap;
+}
+
+/* ---- parameter chips ---- */
+function mkChips(run){
+  var div=el('div','chips');
+  function chip(lbl,val,cls){
+    var c=el('span','chip'+(cls?' '+cls:''));
+    c.innerHTML='<b>'+lbl+'</b> '+val; div.appendChild(c);
+  }
+  var p=run.params||{};
+  chip('preset', p.name||'—');
+  chip('mc', num(p.mc,2)+' kg');
+  chip('m',  num(p.m,3)+' kg');
+  chip('l',  num(p.l,3)+' m');
+  chip('R',  num(p.R,3)+' m');
+  chip('ω_n',num(p.omega_n,2)+' rad/s');
+  chip('E_t',num(p.E_target,3)+' J');
+  chip('capture',num(p.capture_deg,0)+'°');
+  var f=run.fuzzy||{};
+  chip('N sets', f.n_sets,'info');
+  chip('MF', f.mf_type,'info');
+  chip('infer', f.inference,'info');
+  if(f.type2) chip('Type-2','FOU='+num(f.fou_width,2),'warn');
+  chip('rules', f.rule_preset,'info');
+  chip('swing-up', run.swingup);
+  var li=run.lin_info||{};
+  if(li.rank_co!=null){
+    chip('rank(ctrl)',li.rank_co+'/4', li.rank_co<4?'fail':'ok');
+    chip('rank(obs)', li.rank_obs+'/4','ok');
+  }
+  return div;
+}
+
+/* ---- summary table ---- */
+function mkTable(ctrls){
+  var wrap=el('div','tbl-wrap');
+  var tbl=document.createElement('table'); tbl.className='summary';
+  var cols=[
+    {k:'key',l:'Controller',num:false},
+    {k:'t_capture',l:'t_capture (s)',num:true},
+    {k:'t_settle',l:'θ settle (s)',num:true},
+    {k:'overshoot',l:'Overshoot (°)',num:true},
+    {k:'rms_theta',l:'RMS θ (°)',num:true},
+    {k:'xc_final_error',l:'x_c error (m)',num:true},
+    {k:'t_xc_settle',l:'x_c settle (s)',num:true},
+    {k:'total_effort',l:'Effort (N·s)',num:true},
+    {k:'pct_ok_stab',l:'V̇<0 stab (%)',num:true},
+  ];
+  var thead=document.createElement('thead');
+  var hrow=document.createElement('tr');
+  cols.forEach(function(c){
+    var th=document.createElement('th');
+    th.textContent=c.l;
+    th.addEventListener('click',function(){sortTbl(tbl,cols,c,th);});
+    hrow.appendChild(th);
+  });
+  thead.appendChild(hrow); tbl.appendChild(thead);
+
+  var tbody=document.createElement('tbody');
+  var best_s=Math.min.apply(null,ctrls.map(function(c){
+    return c.captured&&fin(c.t_settle)?c.t_settle:Infinity;}));
+
+  ctrls.forEach(function(c){
+    var tr=document.createElement('tr');
+    if(!c.captured) tr.classList.add('failed-row');
+    else if(Math.abs((c.t_settle||Infinity)-best_s)<0.01) tr.classList.add('best');
+    [c.key, num(c.t_capture,2), c.captured?num(c.t_settle,2):'—',
+     num(c.overshoot,1), num(c.rms_theta,2),
+     num(c.xc_final_error,3), num(c.t_xc_settle,2),
+     num(c.total_effort,1), pct(c.pct_ok_stab)
+    ].forEach(function(v,i){
+      var td=document.createElement('td');
+      td.textContent=v; if(i===0)td.style.fontFamily='ui-monospace,monospace';
+      // flag the position column when the cart genuinely reached the target
+      if(i===5){
+        if(c.xc_settled) td.classList.add('good');
+        else if(fin(c.xc_final_error)&&c.xc_final_error>0.2) td.classList.add('bad');
+      }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  tbl.appendChild(tbody); wrap.appendChild(tbl); return wrap;
+}
+
+function sortTbl(tbl,cols,col,th){
+  var dir=th.dataset.dir==='asc'?'desc':'asc';
+  tbl.querySelectorAll('th').forEach(function(h){delete h.dataset.dir;});
+  th.dataset.dir=dir;
+  var idx=cols.indexOf(col);
+  var rows=Array.from(tbl.querySelector('tbody').rows);
+  rows.sort(function(a,b){
+    var va=a.cells[idx].textContent,vb=b.cells[idx].textContent;
+    var na=parseFloat(va),nb=parseFloat(vb);
+    return(!isNaN(na)&&!isNaN(nb))?(na-nb)*(dir==='asc'?1:-1):va.localeCompare(vb)*(dir==='asc'?1:-1);
+  });
+  rows.forEach(function(r){tbl.querySelector('tbody').appendChild(r);});
+}
+
+/* ---- one run panel ---- */
+/* ===================================================================
+   DISTURBANCE REJECTION  (added RP2)
+   =================================================================== */
+function fmtRecov(v){
+  if(!fin(v)) return '<span class="recov-bad">never</span>';
+  var cls = v<=2 ? 'recov-ok' : (v<=6 ? 'recov-slow' : 'recov-bad');
+  return '<span class="'+cls+'">'+num(v,2)+' s</span>';
+}
+
+function mkDistTable(dist){
+  var wrap=el('div','tbl-wrap');
+  var tbl=document.createElement('table'); tbl.className='summary';
+  var heads=['Controller','peak |θ| (°)','θ recovery','peak |Δx_c| (m)',
+             'x_c recovery','final x_c err (m)','outcome'];
+  var thead=document.createElement('thead'), hr=document.createElement('tr');
+  heads.forEach(function(h){var th=document.createElement('th');th.textContent=h;hr.appendChild(th);});
+  thead.appendChild(hr); tbl.appendChild(thead);
+
+  var tb=document.createElement('tbody');
+  (dist.controllers||[]).forEach(function(c){
+    var tr=document.createElement('tr');
+    if(c.lost) tr.classList.add('failed-row');
+    var cells=[
+      c.key,
+      num(c.max_theta_dev,2),
+      fmtRecov(c.recover_theta),
+      num(c.max_xc_dev,3),
+      fmtRecov(c.recover_xc),
+      num(c.xc_final_error,3),
+      c.lost ? '<span class="recov-bad">lost</span>'
+             : '<span class="recov-ok">recovered</span>'
+    ];
+    cells.forEach(function(v,i){
+      var td=document.createElement('td');
+      td.innerHTML=v;
+      if(i===0) td.style.fontFamily='ui-monospace,monospace';
+      tr.appendChild(td);
+    });
+    tb.appendChild(tr);
+  });
+  tbl.appendChild(tb); wrap.appendChild(tbl); return wrap;
+}
+
+var DIST_BLURB={
+  kick:    'A short horizontal force pulse applied to the cart — the classic '+
+           'impulse-response test. Measures how quickly the controller recovers '+
+           'both the angle and the cart position after a sudden shove.',
+  wind:    'A sustained aerodynamic load on the rod, ramped up, held, then '+
+           'released. Unlike the kick this is a persistent bias, so a controller '+
+           'with no integral action will hold a steady offset for its duration.',
+  friction:'Coulomb plus viscous drag added to the cart over a fixed window. '+
+           'Tests the controller against an unmodelled dissipative force that '+
+           'opposes exactly the motion the governor is trying to produce.',
+  mass:    'The bob mass increases partway through the run. A parametric change '+
+           'rather than an additive one: the plant itself is different afterwards, '+
+           'so gains tuned for the nominal mass are no longer optimal.',
+  tilt:    'The track is inclined, so gravity acts along the cart axis. This is '+
+           'present from t = 0 and never stops, making it the hardest steady-state '+
+           'test — holding position requires a permanent non-zero control effort.'
+};
+
+function mkDisturbanceSection(run){
+  var ds=run.disturbances||[];
+  var sec=el('div','');
+  if(!ds.length){
+    var none=el('p','dist-note',
+      'No disturbance runs found for this baseline. Run the disturbance suite '+
+      'to populate this section.');
+    sec.appendChild(none);
+    return sec;
+  }
+
+  var note=el('p','dist-note');
+  note.innerHTML='Each disturbance was applied to the <em>already-settled</em> '+
+    'system, warm-started from the baseline run above. Recovery time is measured '+
+    'from the moment the disturbance begins, and counts only the point after '+
+    'which the signal stays inside tolerance for the rest of the run '+
+    '(θ within 3°, x_c within 5 cm).';
+  sec.appendChild(note);
+
+  var tabs=el('div','dist-tabs');
+  var body=el('div','');
+  ds.forEach(function(d,i){
+    var b=el('button','dist-tab',d.type);
+    if(i===0) b.classList.add('active');
+    b.addEventListener('click',function(){
+      tabs.querySelectorAll('.dist-tab').forEach(function(x){x.classList.remove('active');});
+      b.classList.add('active');
+      body.innerHTML='';
+      body.appendChild(mkDistBody(d));
+    });
+    tabs.appendChild(b);
+  });
+  sec.appendChild(tabs);
+  body.appendChild(mkDistBody(ds[0]));
+  sec.appendChild(body);
+  return sec;
+}
+
+function mkDistBody(d){
+  var w=el('div','');
+  var blurb=el('p','dist-note');
+  blurb.innerHTML='<strong>'+d.type+'</strong> — '+(DIST_BLURB[d.type]||'')+
+    ' Onset at t = '+num(d.t_onset,1)+' s.';
+  w.appendChild(blurb);
+  w.appendChild(mkDistTable(d));
+  w.appendChild(mkDistMedia(d));
+  return w;
+}
+
+function mkDistMedia(d){
+  var box=el('div','');
+  var ctrls=(d.controllers||[]).filter(function(c){
+    var a=c.assets||{};
+    return a.pendulum_gif||a.graphs_gif||a.response_png||a.phase_png;
+  });
+
+  if(!ctrls.length){
+    var hint=el('p','hint');
+    hint.textContent='No figures or animations exported for this disturbance '+
+      'run yet. Use "Animate selected" / "Export selected" on the Run & Results '+
+      'tab of the launcher, then rebuild the report.';
+    box.appendChild(hint);
+    return box;
+  }
+
+  box.appendChild(el('h4','','Figures and animations'));
+  var grid=el('div','ctrl-grid');
+  ctrls.forEach(function(c){
+    var a=c.assets||{};
+    var head=el('div','');
+    head.style.cssText='grid-column:1/-1;font-family:ui-monospace,monospace;'+
+      'font-size:.86rem;font-weight:600;color:#24292f;margin:8px 0 2px';
+    head.textContent=c.key+(c.lost?'   (lost)':'');
+    grid.appendChild(head);
+
+    var row=el('div','ctrl-row');
+    if(a.response_png) row.appendChild(mkCell(a.response_png,'Response'));
+    if(a.phase_png)    row.appendChild(mkCell(a.phase_png,'Phase plane'));
+    if(a.lyapunov_png) row.appendChild(mkCell(a.lyapunov_png,'Lyapunov'));
+    if(a.pendulum_gif) row.appendChild(mkCell(a.pendulum_gif,'Pendulum'));
+    if(a.graphs_gif)   row.appendChild(mkCell(a.graphs_gif,'Graphs'));
+    grid.appendChild(row);
+  });
+  box.appendChild(grid);
+  return box;
+}
+
+/* ===================================================================
+   OPTIMISATION  (added RP2)
+   =================================================================== */
+function mkOptSection(opt){
+  var sec=el('div','');
+  if(!opt||!opt.controllers||!opt.controllers.length){
+    sec.appendChild(el('p','dist-note',
+      'No optimisation results found. Run opt_run, then opt_apply, then '+
+      'rebuild this report to populate this section.'));
+    return sec;
+  }
+
+  var note=el('p','dist-note');
+  var w=opt.cost_weights||[];
+  note.innerHTML='Gains were tuned by Nelder-Mead simplex search against the '+
+    'full nonlinear simulation. Each search starts from the gains derived '+
+    'analytically from the augmented LQR solution, so the "warm start" column '+
+    'is the untuned design and any improvement is a genuine gain over it. '+
+    (w.length>=4 ? 'Cost weights — settle '+w[0]+', overshoot '+w[1]+
+                   ', x_c '+w[2]+', effort '+w[3]+'.' : '');
+  sec.appendChild(note);
+
+  // Summary table
+  var wrap=el('div','tbl-wrap');
+  var tbl=document.createElement('table'); tbl.className='summary';
+  var heads=['Controller','cost (warm → opt)','improvement','θ settle (s)',
+             'overshoot (°)','x_c error (m)','effort (N·s)'];
+  var thead=document.createElement('thead'), hr=document.createElement('tr');
+  heads.forEach(function(h){var th=document.createElement('th');th.textContent=h;hr.appendChild(th);});
+  thead.appendChild(hr); tbl.appendChild(thead);
+
+  var tb=document.createElement('tbody');
+  opt.controllers.forEach(function(c){
+    var tr=document.createElement('tr');
+    if(!c.captured) tr.classList.add('failed-row');
+    var imp='—';
+    if(fin(c.cost_warm)&&fin(c.cost)&&c.cost_warm>0){
+      var pc=(c.cost_warm-c.cost)/c.cost_warm*100;
+      imp='<span class="'+(pc>1?'improve-pos':'improve-neg')+'">'+
+          num(pc,1)+'%</span>';
+    }
+    var cells=[c.key,
+      (fin(c.cost_warm)?num(c.cost_warm,3):'—')+' → '+num(c.cost,3),
+      imp, num(c.t_settle,2), num(c.overshoot,1),
+      num(c.xc_final_error,3), num(c.total_effort,1)];
+    cells.forEach(function(v,i){
+      var td=document.createElement('td'); td.innerHTML=v;
+      if(i===0) td.style.fontFamily='ui-monospace,monospace';
+      tr.appendChild(td);
+    });
+    tb.appendChild(tr);
+  });
+  tbl.appendChild(tb); wrap.appendChild(tbl); sec.appendChild(wrap);
+
+  // Pareto front: settle time vs effort
+  sec.appendChild(el('h3','','Pareto front — speed versus effort'));
+  sec.appendChild(mkPareto(opt.controllers));
+
+  // Per-controller parameter cards
+  sec.appendChild(el('h3','','Tuned parameters'));
+  var pn=el('p','dist-note');
+  pn.innerHTML='Each bar spans the search range for that parameter. '+
+    'Grey marks the analytical warm start, blue the tuned value. A blue bar '+
+    'pinned to either end means the optimiser wanted to go further than the '+
+    'bounds allowed.';
+  sec.appendChild(pn);
+
+  var grid=el('div','opt-grid');
+  opt.controllers.forEach(function(c){
+    var card=el('div','opt-card');
+    var h=document.createElement('h4'); h.textContent=c.key; card.appendChild(h);
+    (c.param_names||[]).forEach(function(nm,i){
+      var lab=el('div','');
+      lab.style.cssText='font-size:.78rem;color:#57606a;display:flex;justify-content:space-between';
+      lab.innerHTML='<span>'+nm+'</span><span>'+num(c.params[i],4)+'</span>';
+      card.appendChild(lab);
+      var bar=el('div','parbar');
+      var ws=document.createElement('i'); ws.className='ws';
+      var wsv=Math.max(0,Math.min(1,c.warm_start_norm[i]));
+      ws.style.left=(wsv*100)+'%'; ws.style.width='3px';
+      var op=document.createElement('i'); op.className='opt';
+      var opv=Math.max(0,Math.min(1,c.params_norm[i]));
+      op.style.left=(Math.min(wsv,opv)*100)+'%';
+      op.style.width=(Math.max(0.8,Math.abs(opv-wsv)*100))+'%';
+      bar.appendChild(op); bar.appendChild(ws);
+      card.appendChild(bar);
+    });
+    grid.appendChild(card);
+  });
+  sec.appendChild(grid);
+  return sec;
+}
+
+function mkPareto(ctrls){
+  var W=640,H=380,PL=64,PR=20,PT=18,PB=48;
+  var pts=ctrls.filter(function(c){
+    return fin(c.t_settle)&&fin(c.total_effort)&&c.captured;});
+  if(!pts.length) return el('p','dist-note','No settled controllers to plot.');
+
+  var xs=pts.map(function(c){return c.t_settle;});
+  var ys=pts.map(function(c){return c.total_effort;});
+  var x0=0, x1=Math.max.apply(null,xs)*1.15;
+  var y0=0, y1=Math.max.apply(null,ys)*1.15;
+  function sx(v){return PL+(v-x0)/(x1-x0)*(W-PL-PR);}
+  function sy(v){return H-PB-(v-y0)/(y1-y0)*(H-PT-PB);}
+
+  var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  svg.setAttribute('width','100%');
+  function add(t,at){var e=document.createElementNS(svg.namespaceURI,t);
+    for(var k in at)e.setAttribute(k,at[k]);svg.appendChild(e);return e;}
+  function txt(x,y,s,anc,fs,fill){
+    var e=document.createElementNS(svg.namespaceURI,'text');
+    e.setAttribute('x',x);e.setAttribute('y',y);
+    e.setAttribute('text-anchor',anc||'middle');
+    e.setAttribute('font-size',fs||11);
+    e.setAttribute('fill',fill||'#57606a');
+    e.textContent=s;svg.appendChild(e);return e;}
+
+  add('rect',{x:PL,y:PT,width:W-PL-PR,height:H-PT-PB,fill:'#fbfcfd',stroke:'#d0d7de'});
+  for(var g=0;g<=4;g++){
+    var gx=PL+(W-PL-PR)*g/4, gy=PT+(H-PT-PB)*g/4;
+    add('line',{x1:gx,y1:PT,x2:gx,y2:H-PB,stroke:'#eaeef2'});
+    add('line',{x1:PL,y1:gy,x2:W-PR,y2:gy,stroke:'#eaeef2'});
+    txt(gx,H-PB+16,num(x0+(x1-x0)*g/4,1));
+    txt(PL-8,gy+4,num(y1-(y1-y0)*g/4,0),'end');
+  }
+  txt((PL+W-PR)/2,H-10,'settling time (s)','middle',12,'#24292f');
+  var yl=txt(16,(PT+H-PB)/2,'control effort (N·s)','middle',12,'#24292f');
+  yl.setAttribute('transform','rotate(-90 16 '+((PT+H-PB)/2)+')');
+
+  // Pareto-efficient staircase
+  var srt=pts.slice().sort(function(a,b){return a.t_settle-b.t_settle;});
+  var front=[],best=Infinity;
+  srt.forEach(function(c){ if(c.total_effort<best){front.push(c);best=c.total_effort;} });
+  if(front.length>1){
+    var dpath='M '+sx(front[0].t_settle)+' '+sy(front[0].total_effort);
+    for(var i=1;i<front.length;i++){
+      dpath+=' L '+sx(front[i].t_settle)+' '+sy(front[i-1].total_effort);
+      dpath+=' L '+sx(front[i].t_settle)+' '+sy(front[i].total_effort);
+    }
+    add('path',{d:dpath,fill:'none',stroke:'#8c959f','stroke-dasharray':'5 4','stroke-width':1.4});
+  }
+
+  var PAL=['#e4572e','#3b7dd8','#2fa36b','#e8a33d','#8b5cf6','#17a2b8','#e0529c'];
+  pts.forEach(function(c,i){
+    var col=PAL[i%PAL.length];
+    add('circle',{cx:sx(c.t_settle),cy:sy(c.total_effort),r:7,
+                  fill:col,stroke:'#fff','stroke-width':1.6});
+    txt(sx(c.t_settle)+11,sy(c.total_effort)+4,c.key.replace('FuzzyPID_','FPD-'),
+        'start',10,col);
+  });
+  var box=el('div',''); box.appendChild(svg); return box;
+}
+
+/* ===================================================================
+   AUTO-GENERATED FINDINGS  (reads the data, states what it shows)
+   =================================================================== */
+function bestBy(ctrls, key, lowerIsBetter){
+  var pool=ctrls.filter(function(c){return c.captured&&fin(c[key]);});
+  if(!pool.length) return null;
+  return pool.reduce(function(a,b){
+    return (lowerIsBetter ? (b[key]<a[key]) : (b[key]>a[key])) ? b : a;
+  });
+}
+
+function mkFindings(run){
+  var box=el('div','findings');
+  var cs=run.controllers||[];
+  var out=[];
+
+  var settled = cs.filter(function(c){return c.captured&&fin(c.t_settle);});
+  var failed  = cs.filter(function(c){return !c.captured;});
+  var parked  = cs.filter(function(c){return c.xc_settled;});
+
+  // 1. Capture and settle
+  if(settled.length===cs.length){
+    out.push(['ok','All '+cs.length+' controllers captured the pendulum and '+
+      'settled the angle.']);
+  }else if(settled.length){
+    out.push(['warn',settled.length+' of '+cs.length+' controllers settled. '+
+      (failed.length? 'Did not capture: '+failed.map(function(c){return c.key;}).join(', ')+'.' : '')]);
+  }
+
+  // 2. Fastest / slowest angle settle
+  var fast=bestBy(cs,'t_settle',true), slow=bestBy(cs,'t_settle',false);
+  if(fast&&slow&&fast.key!==slow.key){
+    var ratio=slow.t_settle/Math.max(fast.t_settle,1e-6);
+    out.push(['ok','Fastest angle settle: <b>'+fast.key+'</b> at '+
+      num(fast.t_settle,2)+' s — '+num(ratio,1)+'× quicker than <b>'+
+      slow.key+'</b> ('+num(slow.t_settle,2)+' s).']);
+  }
+
+  // 3. Position regulation — the headline result
+  if(parked.length){
+    var errs=parked.map(function(c){return c.xc_final_error;});
+    var worst=Math.max.apply(null,errs);
+    out.push(['ok','<b>'+parked.length+' of '+cs.length+'</b> controllers '+
+      'brought the cart to within 5 cm of x<sub>ref</sub> and held it. '+
+      'Largest final error among them: '+num(worst*1000,1)+' mm.']);
+  }
+  var drifted = cs.filter(function(c){
+    return c.captured && fin(c.xc_final_error) && c.xc_final_error>0.2;});
+  if(drifted.length){
+    out.push(['warn','Balanced but did not reach the target: <b>'+
+      drifted.map(function(c){return c.key;}).join(', ')+'</b>. '+
+      'These hold the angle without closing the position loop — the '+
+      'signature of a controller whose governor never engaged.']);
+  }
+
+  // 4. Effort
+  var lean=bestBy(cs,'total_effort',true), heavy=bestBy(cs,'total_effort',false);
+  if(lean&&heavy&&lean.key!==heavy.key){
+    out.push(['info','Control effort spans '+num(lean.total_effort,1)+
+      ' N·s (<b>'+lean.key+'</b>) to '+num(heavy.total_effort,1)+
+      ' N·s (<b>'+heavy.key+'</b>), a '+
+      num(heavy.total_effort/Math.max(lean.total_effort,1e-6),1)+'× range.']);
+  }
+
+  // 5. Fuzzy vs LQR — the project's central comparison
+  var lqr=cs.find(function(c){return c.key==='LQR';});
+  var fz =settled.filter(function(c){return c.key.indexOf('Fuzzy')===0;});
+  if(lqr&&lqr.captured&&fz.length){
+    var fzBest=fz.reduce(function(a,b){return b.t_settle<a.t_settle?b:a;});
+    if(fin(lqr.t_settle)&&fin(fzBest.t_settle)){
+      if(fzBest.t_settle<lqr.t_settle){
+        out.push(['ok','Against the LQR baseline, the best fuzzy controller '+
+          '(<b>'+fzBest.key+'</b>) settled '+
+          num(lqr.t_settle-fzBest.t_settle,2)+' s sooner, at '+
+          num(fzBest.total_effort/Math.max(lqr.total_effort,1e-6)*100,0)+
+          '% of the LQR effort. The gain-scheduled fuzzy rules act hardest '+
+          'during the large-error transient just after capture, which is '+
+          'exactly where the linearised LQR is least valid.']);
+      }else{
+        out.push(['info','The LQR baseline settled fastest ('+
+          num(lqr.t_settle,2)+' s vs '+num(fzBest.t_settle,2)+
+          ' s for the best fuzzy controller). Near equilibrium the plant is '+
+          'genuinely linear, so optimal full-state feedback is hard to beat '+
+          'there; the fuzzy advantage, if any, lies in the transient.']);
+      }
+    }
+  }
+
+  // 6. SMC honesty
+  var smc=cs.find(function(c){return c.key==='FuzzySMC';});
+  if(smc){
+    if(!smc.captured || !fin(smc.t_settle) ||
+       (fin(smc.xc_final_error)&&smc.xc_final_error>0.2)){
+      out.push(['warn','<b>FuzzySMC</b> underperforms here, and the reason is '+
+        'structural rather than a tuning failure. The sliding surface drives '+
+        's = λe + ė to zero, which defines a <em>trajectory</em> toward the '+
+        'origin, not the origin itself. Without integral action it settles at '+
+        'a small non-zero angle whenever the cart is in sustained motion, so '+
+        'the governor never sees the stable band it needs to engage.']);
+    }
+  }
+
+  // 7. Lyapunov
+  var ly=cs.filter(function(c){return fin(c.pct_ok_stab);});
+  if(ly.length){
+    var mn=Math.min.apply(null,ly.map(function(c){return c.pct_ok_stab;}));
+    if(mn>95){
+      out.push(['ok','Every controller satisfied V̇ < 0 on at least '+
+        num(mn,1)+'% of stabilisation steps, so the Lyapunov argument holds '+
+        'empirically across the board.']);
+    }
+  }
+
+  var ul=el('ul','find-list');
+  out.forEach(function(pair){
+    var li=document.createElement('li');
+    li.className='find-'+pair[0];
+    li.innerHTML=pair[1];
+    ul.appendChild(li);
+  });
+  box.appendChild(el('h3','','What this run shows'));
+  box.appendChild(ul);
+  return box;
+}
+
+/* ---- How to read the tables ---------------------------------------- */
+function mkGlossary(){
+  var d=document.createElement('details');
+  d.className='glossary';
+  var s=document.createElement('summary');
+  s.textContent='How to read these numbers';
+  d.appendChild(s);
+  var rows=[
+    ['t_capture','Time from release at the hanging position until the pendulum '+
+      'first enters the capture zone. This measures the swing-up strategy, not '+
+      'the controller — it is identical across controllers sharing a strategy.'],
+    ['θ settle','Time <em>after capture</em> for |θ| to fall below 1° and stay '+
+      'there. Measures the stabilising controller alone.'],
+    ['Overshoot','Peak |θ| reached after capture. Large values mean the '+
+      'controller caught the pendulum late or over-corrected.'],
+    ['x_c error','Distance between the cart and x<sub>ref</sub> at the end of '+
+      'the run. This is the position-regulation result: single-digit '+
+      'millimetres means the cascade closed the loop properly.'],
+    ['x_c settle','Time after capture for the cart to reach and stay within '+
+      '5 cm of target. Always longer than the angle settle — the governor '+
+      'waits for balance before it starts moving the cart, by design.'],
+    ['Effort','∫|F| dt over the run. Proxy for actuator wear and energy use. '+
+      'Compare only against controllers that actually succeeded.'],
+    ['V̇ < 0','Fraction of stabilisation steps where the Lyapunov derivative '+
+      'was negative. High values support the stability claim; values well '+
+      'below 100% indicate the controller is fighting rather than converging.']
+  ];
+  var tbl=document.createElement('table');
+  tbl.className='summary';
+  rows.forEach(function(r){
+    var tr=document.createElement('tr');
+    var a=document.createElement('td'), b=document.createElement('td');
+    a.innerHTML='<code>'+r[0]+'</code>';
+    a.style.cssText='white-space:nowrap;font-weight:600;width:130px';
+    b.innerHTML=r[1];
+    tr.appendChild(a); tr.appendChild(b); tbl.appendChild(tr);
+  });
+  d.appendChild(tbl);
+  return d;
+}
+
+function mkPanel(run, idx){
+  var panel=el('section','run-panel');
+  panel.id='panel-'+run.id;
+  panel.setAttribute('role','tabpanel');
+  if(idx!==0)panel.hidden=true;
+
+  var ctrls=run.controllers||[];
+
+  panel.appendChild(mkChips(run));
+  panel.appendChild(mkFindings(run));
+  panel.appendChild(mkGlossary());
+
+  // Fuzzy system figures
+  if(run.mf_png||run.surface_png){
+    var h3mf=el('h3','','Fuzzy system — MFs & control surface');
+    panel.appendChild(h3mf);
+    var mfRow=el('div','');
+    mfRow.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0';
+    if(run.mf_png)      mfRow.appendChild(mkCell(run.mf_png,'Membership functions'));
+    if(run.surface_png) mfRow.appendChild(mkCell(run.surface_png,'Control surface Kp/Kd'));
+    panel.appendChild(mfRow);
+  }
+
+  // Rule base heatmap
+  if(run.kp_rule){
+    panel.appendChild(el('h3','','Rule base — Kp table'));
+    var rbWrap=mkRuleheatmap(run.kp_rule,'kp consequents');
+    if(rbWrap) panel.appendChild(rbWrap);
+    panel.appendChild(el('p','hint','Colour: dark blue = small gain, red-orange = large gain. Click run to see the effect of each cell on the control surface.'));
+  }
+
+  // Parameters figure
+  if(run.params_png){
+    panel.appendChild(el('h3','','System parameters'));
+    var pw=mkCell(run.params_png,'Parameters'); panel.appendChild(pw);
+  }
+
+  // Combined figure
+  if(run.comparison_png){
+    panel.appendChild(el('h3','','All controllers — combined comparison'));
+    var cw=mkCell(run.comparison_png,'Combined'); panel.appendChild(cw);
+    panel.appendChild(el('p','hint','Click to enlarge. ★ = best settling time.'));
+  }
+
+  // Summary table
+  if(ctrls.length){
+    panel.appendChild(el('h3','','Performance summary'));
+    panel.appendChild(mkTable(ctrls));
+    panel.appendChild(el('p','hint',
+      '★ = best settling time  ·  red row = failed to capture  ·  click column header to sort'));
+  }
+
+  // Metrics bar chart
+  if(run.metrics_png){
+    panel.appendChild(el('h3','','Metrics bar chart'));
+    var mw=mkCell(run.metrics_png,'Metrics'); panel.appendChild(mw);
+  }
+
+  if(!ctrls.length) return panel;
+
+  // Per-controller grid
+  var toolbar=el('div','toolbar');
+  toolbar.appendChild(el('h3',null,'Per-controller results'));
+  var playAll=el('button','btn','▶ play all GIFs');
+  var stopAll=el('button','btn','■ stop all');
+  playAll.addEventListener('click',function(){setAllGifs(panel,true);});
+  stopAll.addEventListener('click',function(){setAllGifs(panel,false);});
+  toolbar.appendChild(playAll); toolbar.appendChild(stopAll);
+  panel.appendChild(toolbar);
+  panel.appendChild(el('p','hint','Click static images to enlarge. Click GIFs to play/stop.'));
+
+  var grid=el('div','ctrl-grid');
+  var head=el('div','grid-head');
+  ['Controller','Response','Phase plane','Lyapunov','Animation'].forEach(function(h){
+    head.appendChild(el('div',null,h));
+  });
+  grid.appendChild(head);
+
+  ctrls.forEach(function(c){
+    var row=el('div','ctrl-row');
+    // Label
+    var lbl=el('div','ctrl-label');
+    lbl.appendChild(el('div','cname',c.key.replace(/_/g,' ')));
+    if(c.captured){
+      if(fin(c.t_settle)){
+        lbl.appendChild(el('div','cbadge ok','settle '+num(c.t_settle,2)+'s'));
+      }else{
+        lbl.appendChild(el('div','cbadge dim','no settle'));
+      }
+    }else{
+      lbl.appendChild(el('div','cbadge fail','not captured'));
+    }
+    // Lyapunov %
+    if(fin(c.pct_ok_stab)){
+      var lvbadge=el('div','cbadge '+(c.pct_ok_stab>90?'ok':'dim'));
+      lvbadge.textContent='V̇<0: '+pct(c.pct_ok_stab);
+      lbl.appendChild(lvbadge);
+    }
+    row.appendChild(lbl);
+
+    // Media
+    var a=c.assets||{};
+    row.appendChild(mkCell(a.response_png||'','Response'));
+    row.appendChild(mkCell(a.phase_png||'','Phase plane'));
+    row.appendChild(mkCell(a.lyapunov_png||'','Lyapunov'));
+    row.appendChild(mkCell(a.pendulum_gif||'','Pendulum'));
+    row.appendChild(mkCell(a.graphs_gif||'','Graphs'));
+
+    grid.appendChild(row);
+
+    // Collapsible Lyapunov trace
+    var expWrap=el('div','');
+    expWrap.style.cssText='grid-column:1/-1;padding:2px 0 10px;border-bottom:2px solid #d0d7de;margin-bottom:6px';
+    var expBtn=el('button','btn','▼ show Lyapunov traces');
+    expBtn.style.fontSize='.74rem';
+    var traceDiv=el('div','');
+    traceDiv.style.display='none';
+    expBtn.addEventListener('click',function(){
+      if(traceDiv.style.display==='none'){
+        traceDiv.style.display='block';
+        expBtn.textContent='▲ hide Lyapunov traces';
+        // Build traces if not yet built
+        if(!traceDiv.dataset.built){
+          traceDiv.dataset.built='1';
+          // We don't have trace data in the JSON for Lyapunov (too large)
+          // Instead link to the PNG
+          if(a.lyapunov_png){
+            var img2=el('img'); img2.src=a.lyapunov_png;
+            img2.style.cssText='width:100%;border-radius:6px;margin-top:6px';
+            img2.addEventListener('click',function(){openLb(a.lyapunov_png,'Lyapunov');});
+            traceDiv.appendChild(img2);
+          }else{
+            traceDiv.appendChild(el('p','hint','No Lyapunov figure available for this run.'));
+          }
+        }
+      }else{
+        traceDiv.style.display='none';
+        expBtn.textContent='▼ show Lyapunov traces';
+      }
+    });
+    expWrap.appendChild(expBtn);
+    expWrap.appendChild(traceDiv);
+    grid.appendChild(expWrap);
+  });
+
+  panel.appendChild(grid);
+
+  // ---- Disturbance rejection (RP2) -----------------------------------
+  panel.appendChild(el('h3','','Disturbance rejection'));
+  panel.appendChild(mkDisturbanceSection(run));
+
+  return panel;
+}
+
+/* ---- empty state ---- */
+function emptyState(){
+  var box=el('div','empty');
+  box.innerHTML='<p style="font-size:1rem;font-weight:600;margin-bottom:8px">No run data found</p>'+
+    '<ol style="text-align:left;display:inline-block;margin:0;padding-left:1.4em">'+
+    '<li>Run <code>pendulum_launch</code> or <code>run_all</code> in MATLAB.</li>'+
+    '<li>Run <code>fp_build_report</code> to generate <code>report_data.js</code>.</li>'+
+    '<li>Keep <code>report.html</code> and <code>report_data.js</code> in the same folder.</li>'+
+    '<li>On GitHub Pages, commit <code>report_data.js</code> and push — wait ~60 s.</li>'+
+    '</ol>';
+  return box;
+}
+
+/* ---- boot ---- */
+function render(data){
+  var tabbar=document.getElementById('tabbar');
+  var panels=document.getElementById('panels');
+  var runs=(data&&data.runs)||[];
+  if(data&&data.generated_utc){
+    document.getElementById('gen-stamp').textContent='Data bundle generated '+data.generated_utc;
+  }
+  if(!runs.length){
+    tabbar.remove(); panels.appendChild(emptyState()); return;
+  }
+  runs.forEach(function(run,i){
+    var tab=el('button','tab',run.name||run.id);
+    tab.type='button'; tab.setAttribute('role','tab');
+    tab.setAttribute('aria-selected',i===0?'true':'false');
+    tab.dataset.target='panel-'+run.id;
+    tab.addEventListener('click',function(){
+      tabbar.querySelectorAll('.tab').forEach(function(t){t.setAttribute('aria-selected','false');});
+      tab.setAttribute('aria-selected','true');
+      panels.querySelectorAll('.run-panel').forEach(function(p){
+        p.hidden=p.id!==tab.dataset.target;
+      });
+    });
+    tabbar.appendChild(tab);
+    panels.appendChild(mkPanel(run,i));
+  });
+
+  // ---- Optimisation tab (RP2) ----------------------------------------
+  // Shown once, not per run, since tuning is run-independent.
+  if(data && data.optimisation && data.optimisation.controllers &&
+     data.optimisation.controllers.length){
+    var otab=el('button','tab','⚙ optimisation');
+    otab.type='button'; otab.setAttribute('role','tab');
+    otab.setAttribute('aria-selected','false');
+    otab.dataset.target='panel-optimisation';
+    otab.addEventListener('click',function(){
+      tabbar.querySelectorAll('.tab').forEach(function(t){t.setAttribute('aria-selected','false');});
+      otab.setAttribute('aria-selected','true');
+      panels.querySelectorAll('.run-panel').forEach(function(p){
+        p.hidden=p.id!=='panel-optimisation';
+      });
+    });
+    tabbar.appendChild(otab);
+
+    var opanel=el('div','run-panel');
+    opanel.id='panel-optimisation';
+    opanel.hidden=true;
+    opanel.appendChild(el('h2','','Gain optimisation'));
+    var meta=el('p','hint');
+    meta.textContent='Preset: '+(data.optimisation.preset||'—')+
+      '   ·   swing-up: '+(data.optimisation.swingup||'—')+
+      '   ·   generated: '+(data.optimisation.generated||'—');
+    opanel.appendChild(meta);
+    opanel.appendChild(mkOptSection(data.optimisation));
+    panels.appendChild(opanel);
+  }
+}
+
+function boot(){
+  if(window.PENDULUM_REPORT_DATA){render(window.PENDULUM_REPORT_DATA);return;}
+  fetch('report_data.json')
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(render).catch(function(){render(null);});
+}
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',boot);
+}else{boot();}
+})();
+</script>
+
+<script src="report_data.js" onerror="/* not yet generated */"></script>
+</body>
+</html>

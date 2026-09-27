@@ -9,7 +9,7 @@ rule base origin, inference operator, defuzzification method — is a
 configurable design variable. The non-fuzzy controllers exist to quantify what
 the fuzzy design actually contributes.
 
-**[View the results report →](https://miladnikmand.github.io/inverted-pendulum-fuzzy-control/)**
+**[View the results report →](https://miladnikmand.github.io/inverted-pendulum-fuzzy-control/report.html)**
 
 ---
 
